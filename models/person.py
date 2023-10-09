@@ -4,11 +4,11 @@ from .body import Body
 from .head import Head
 
 class Person(Face, Body, Head):
-    INFO = Object()
-    RESULTS = Object()
+    INFO = OBJ()
+    RESULTS = OBJ()
     def __init__(self, image):
         self.image = image
-        self.dimensions = Object(x=image.shape[1], y=image.shape[0])
+        self.dimensions = OBJ(x=image.shape[1], y=image.shape[0])
         self.face = self.get_face_landmarks()
         super().__init__()
         self.gather_info()
@@ -39,20 +39,20 @@ class Person(Face, Body, Head):
         shoulders_passed = shoulders_detected and abs(float(shoulders_slope)) < 3
         passed = (face_passed and glasses_passed and shoulders_passed) if shoulders_detected else (face_passed and glasses_passed)
 
-        face_results = Object(
+        face_results = OBJ(
             detected = face_detected,
             passed = face_passed
         )
-        glasses_results = Object(
-            detected = glasses_detected,
+        glasses_results = OBJ(
+            detected = face_detected and glasses_detected,
             passed = glasses_passed
         )
-        shoulders_results = Object(
+        shoulders_results = OBJ(
             detected = shoulders_detected,
             passed = shoulders_passed
         )
 
-        self.RESULTS = Object(
+        self.RESULTS = OBJ(
             face = face_results,
             glasses = glasses_results,
             shoulders = shoulders_results,

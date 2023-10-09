@@ -2,21 +2,39 @@ from .constants import *
 import numpy
 
 
-
 class Face:
     FACES_COUNT = 0
     FACE_LANDMARK_INDEXES = [1, 33, 61, 199, 263, 291]
     NOSE_BRIDGE_LANDMARK_INDEXES = [
-        9, 8, 168, 6, 197, 195,
-        417, 351, 419, 412, 413,
-        464, 357, 193, 122, 196,
-        188, 189, 245, 188, 174
+        9,
+        8,
+        168,
+        6,
+        197,
+        195,
+        417,
+        351,
+        419,
+        412,
+        413,
+        464,
+        357,
+        193,
+        122,
+        196,
+        188,
+        189,
+        245,
+        188,
+        174,
     ]
+
     def __init__(self, *args, **kwargs):
         self.FACE = self.get_face_landmarks()
         self.FACE_3D = self.get_face_3d()
         self.FACE_2D = self.get_face_2d()
         self.NOSE_BRIDGE = self.get_nose_bridge_position()
+        self.EYES = self.get_eye_position()
         super().__init__(*args, **kwargs)
 
     def get_face_landmarks(self):
@@ -81,6 +99,40 @@ class Face:
             print(f"Could not find nose bridge position: {e}")
             return None
 
+    def get_eye_position(self):
+        try:
+            eye = numpy.array(
+                [
+                    [landmark.x * self.dimensions.x, landmark.y * self.dimensions.y]
+                    for idx, landmark in enumerate(self.FACE[0].landmark)
+                    if idx in [133, 362]
+                ],
+                dtype=numpy.float64,
+            )
+            return eye
+        except Exception as e:
+            print(f"Could not find eye position: {e}")
+            return None
+
+    def get_eye_level(self):
+        try:
+            ys = self.EYES[:, 1]
+            eye_level = (ys[0] + ys[1]) / 2
+            return eye_level
+        except Exception as e:
+            print(f"Could not find eye level: {e}")
+            return None
+
+    def get_face_center(self):
+        try:
+            return OBJ(
+                x=self.FACE[0].landmark[1].x * self.dimensions.x,
+                y=self.FACE[0].landmark[1].y * self.dimensions.y,
+            )
+        except Exception as e:
+            print(f"Could not find face center: {e}")
+            return None
+
     def get_face_rotation(self):
         try:
             focal_length = self.dimensions.x
@@ -104,12 +156,17 @@ class Face:
             rmat, jac = cv2.Rodrigues(rotation_vector)
             angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
 
-            rotational_angles = Object(
+            rotational_angles = OBJ(
                 x=angles[0] * 360,
                 y=angles[1] * 360,
                 z=angles[2] * 360,
             )
-            if rotational_angles.y < 2 and rotational_angles.y > -2 and rotational_angles.x < 2 and rotational_angles.x > -2:
+            if (
+                rotational_angles.y < 2
+                and rotational_angles.y > -2
+                and rotational_angles.x < 2
+                and rotational_angles.x > -2
+            ):
                 direction = "Forward"
             elif rotational_angles.y < -10:
                 direction = "Left"
@@ -130,11 +187,12 @@ class Face:
             else:
                 direction = None
 
-            return Object(angles=rotational_angles, direction=direction)
+            return OBJ(angles=rotational_angles, direction=direction)
 
         except Exception as e:
             print(f"Could not find face rotation: {e}")
             return None
+
     def crop_nose_bridge_image(self):
         try:
             x = self.NOSE_BRIDGE[:, 0]
@@ -152,9 +210,17 @@ class Face:
     def detect_glasses(self):
         try:
             nose_bridge = self.crop_nose_bridge_image()
-            img_blur = cv2.GaussianBlur(numpy.array(nose_bridge),(3,3), sigmaX=0, sigmaY=0)
-            edges = cv2.Canny(image = img_blur, threshold1=100, threshold2=210, apertureSize=3, L2gradient=True)
-            edges_center = edges.T[(int(len(edges.T)/2))]
+            img_blur = cv2.GaussianBlur(
+                numpy.array(nose_bridge), (3, 3), sigmaX=0, sigmaY=0
+            )
+            edges = cv2.Canny(
+                image=img_blur,
+                threshold1=100,
+                threshold2=210,
+                apertureSize=3,
+                L2gradient=True,
+            )
+            edges_center = edges.T[(int(len(edges.T) / 2))]
 
             if 255 in edges_center:
                 return True
@@ -166,14 +232,13 @@ class Face:
 
     def get_face_info(self):
         try:
-            return Object(
-                rotation = self.get_face_rotation(),
-                position = Object(
-                    _3D = self.FACE_3D,
-                    _2D = self.FACE_2D
-                ),
-                count = self.FACES_COUNT,
-                glasses = self.detect_glasses()
+            return OBJ(
+                rotation=self.get_face_rotation(),
+                position=OBJ(_3D=self.FACE_3D, _2D=self.FACE_2D),
+                count=self.FACES_COUNT,
+                glasses=self.detect_glasses(),
+                eyes=OBJ(level=self.get_eye_level(), position=self.EYES),
+                center=self.get_face_center(),
             )
         except Exception as e:
             print(f"Could not get face info: {e}")
@@ -184,4 +249,3 @@ class Face:
             setattr(self.INFO, "face", self.get_face_info())
         except Exception as e:
             print(f"Could not gather info in {self.__class__.__name__}: {e}")
-

@@ -18,15 +18,15 @@ class Body:
     def get_shoulders_position(self):
         pose_index = POSE_SOLUTION.PoseLandmark
         try:
-            left_shoulder = Object(
+            left_shoulder = OBJ(
                 x=self.BODY.landmark[pose_index.LEFT_SHOULDER].x * self.dimensions.x,
                 y=self.BODY.landmark[pose_index.LEFT_SHOULDER].y * self.dimensions.y,
             )
-            right_shoulder = Object(
+            right_shoulder = OBJ(
                 x=self.BODY.landmark[pose_index.RIGHT_SHOULDER].x * self.dimensions.x,
                 y=self.BODY.landmark[pose_index.RIGHT_SHOULDER].y * self.dimensions.y,
             )
-            shoulders = Object(
+            shoulders = OBJ(
                 left = left_shoulder,
                 right = right_shoulder
             )
@@ -49,7 +49,7 @@ class Body:
 
     def get_body_info(self):
         try:
-            return Object(
+            return OBJ(
                 # position = self.SHOULDERS,
                 slope = self.calculate_shoulders_slope()
             )

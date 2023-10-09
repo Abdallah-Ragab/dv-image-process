@@ -33,10 +33,19 @@ class Head:
             print(f"Could not get top of head: {e}")
             return None
 
+    def get_bottom_of_head(self):
+        try:
+            y_values = self.FACE_2D[:, 1]
+            return numpy.max(y_values)
+        except Exception as e:
+            print(f"Could not get bottom of head: {e}")
+            return None
+
     def get_head_info(self):
         try:
             top_of_head = self.get_top_of_head()
-            head_info = Object(top=top_of_head)
+            bottom_of_head = self.get_bottom_of_head()
+            head_info = OBJ(top=top_of_head, bottom=bottom_of_head)
             return head_info
         except Exception as e:
             print(f"Could not get head info: {e}")

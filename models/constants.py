@@ -23,7 +23,7 @@ SELFIE_SEG = SELFIE_SEG_SOLUTION.SelfieSegmentation(model_selection=0)
 DRAWING_SPEC = DRAWING_SOLUTION.DrawingSpec(thickness=1, circle_radius=1)
 
 
-class Object:
+class OBJ:
     def __init__(self, **kwargs) -> None:
         for kw in kwargs:
             setattr(self, kw, kwargs[kw])
@@ -31,7 +31,7 @@ class Object:
     def dict(self):
         dict_ = {}
         for key in self.__dict__:
-            if isinstance(self.__dict__[key], Object):
+            if isinstance(self.__dict__[key], OBJ):
                 dict_[key] = self.__dict__[key].dict()
             else:
                 dict_[key] = self.__dict__[key]
