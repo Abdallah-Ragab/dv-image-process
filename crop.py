@@ -5,7 +5,10 @@ from models import Person
 from contextlib import contextmanager
 import sys, os
 
-
+class ExhaustedSequence(Exception):
+    def __init__(self, sequence_name=None):
+        message = f"Sequence {sequence_name or ''} exhausted without finding a suitable crop."
+        super().__init__(message)
 class Crop:
     def __init__(self, image, info):
         self.image = image
@@ -53,17 +56,6 @@ class Crop:
             bottom_padding_ratio=bottom_padding_percentage,
             image_height=image_height,
         )
-
-    def get_possible_crops(self):
-        crops = []
-        for head_percentage in range(50, 69, 1):
-            for eye_to_bottom_percentage in range(56, 69, 1):
-                crop_lines = self.calculate_crop_lines(
-                    head_percentage, eye_to_bottom_percentage
-                )
-                if crop_lines:
-                    crops.append(crop_lines)
-        return crops
 
     def possible_crops_sequence(self):
         for head_percentage in self.head_possible_ratios:
@@ -116,47 +108,68 @@ class Crop:
         head_ratio_sequence = self.ratio_seq_generator(
             self.head_possible_ratios, preferred_head_ratio_idx
         )
-        eye_ratio_sequence = self.ratio_seq_generator(
-            self.eye_level_possible_ratios, preferred_eye_level_ratio_idx
-        )
+        try:
+            for head_ratio in head_ratio_sequence:
+                eye_ratio_sequence = self.ratio_seq_generator(self.eye_level_possible_ratios, preferred_eye_level_ratio_idx, repeat=True)
+                head_ratio_crops = {}
+                eye_ratio = next(eye_ratio_sequence)
+                direction = 1
+                while len(head_ratio_crops) < len(self.eye_level_possible_ratios):
+                    try:
+                        if eye_ratio in head_ratio_crops:
+                            eye_ratio = eye_ratio_sequence.send(direction)
+                            print("skipped")
+                            continue
+                        crop = self.calculate_crop_lines(head_ratio, eye_ratio)
+                        print(
+                            f"  Ran a crop calculation for head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: {crop.dict() if crop else None}"
+                        )
 
-        for head_ratio in head_ratio_sequence:
-            head_ratio_crops = []
-            for eye_ratio in eye_ratio_sequence:
-                crop = self.calculate_crop_lines(head_ratio, eye_ratio)
+                        head_ratio_crops[eye_ratio] = crop
+                        if not crop:
+                            eye_ratio = eye_ratio_sequence.send(direction)
+                            continue
 
-                if not crop:
-                    continue
+                        crops_over_padded = [
+                            head_ratio_crops[ratio]
+                            for ratio in head_ratio_crops
+                            if head_ratio_crops[ratio] and head_ratio_crops[ratio].top_padding_ratio >= preferred_top_padding
+                        ]
+                        crops_under_padded = [
+                            head_ratio_crops[ratio]
+                            for ratio in head_ratio_crops
+                            if head_ratio_crops[ratio] and head_ratio_crops[ratio].top_padding_ratio <= preferred_top_padding
+                        ]
 
-                head_ratio_crops.append(crop)
-                crops_over_padded = [
-                    crop
-                    for crop in head_ratio_crops
-                    if crop.top_padding_ratio >= preferred_top_padding
-                ]
-                crops_under_padded = [
-                    crop
-                    for crop in head_ratio_crops
-                    if crop.top_padding_ratio <= preferred_top_padding
-                ]
+                        if crop.top_padding_ratio == preferred_top_padding:
+                            return crop
 
-                if crop.top_padding_ratio == preferred_top_padding:
-                    return crop
+                        if len(crops_over_padded) > 0 and len(crops_under_padded) > 0:
+                            over_padded = crops_over_padded[0]
+                            under_padded = crops_under_padded[0]
 
-                if len(crops_over_padded) > 0 and len(crops_under_padded) > 0:
-                    over_padded = crops_over_padded[0]
-                    under_padded = crops_under_padded[-1]
+                            over_padded_diff = abs(
+                                over_padded.top_padding_ratio - preferred_top_padding
+                            )
+                            under_padded_diff = abs(
+                                under_padded.top_padding_ratio - preferred_top_padding
+                            )
+                            if over_padded_diff < under_padded_diff:
+                                return over_padded
+                            else:
+                                return under_padded
 
-                    over_padded_diff = abs(
-                        over_padded.top_padding_ratio - preferred_top_padding
-                    )
-                    under_padded_diff = abs(
-                        under_padded.top_padding_ratio - preferred_top_padding
-                    )
-                    if over_padded_diff < under_padded_diff:
-                        return over_padded
-                    else:
-                        return under_padded
+                        if crop.top_padding_ratio > preferred_top_padding:
+                            direction = -1
+                        else:
+                            direction = 1
+                        eye_ratio = eye_ratio_sequence.send(direction)
+                    except (ExhaustedSequence, StopIteration):
+                        break
+
+        except (ExhaustedSequence, StopIteration):
+            pass
+
         return None
 
     def crop(self):
@@ -172,12 +185,44 @@ class Crop:
             ]
             return cropped_image
 
-    def ratio_seq_generator(self, input_list, start=None):
+    def ratio_seq_generator(self, input_list, start=None, repeat=False):
         index = start if start is not None else 0
         while True:
-            if index < len(input_list) and index >= 0:
+            if repeat:
+                index = index % len(input_list)
+            if index < len(input_list) and (index >= 0):
                 step = yield input_list[index]
             else:
-                raise StopIteration
+                raise ExhaustedSequence
             _step = step if step is not None and isinstance(step, int) else 1
             index += _step
+
+# def ratio_seq_generator(input_list, start=None):
+#     index = start if start is not None else 0
+#     while True:
+#         if index < len(input_list) and index >= 0:
+#             step = yield input_list[index]
+#         else:
+#             raise StopIteration
+#         _step = step if step is not None and isinstance(step, int) else 1
+#         index += _step
+
+# my_list = [1,2,3,4,5,6,7,8,9,10]
+# seq = ratio_seq_generator(my_list, 4)
+# printed = []
+# counter = 0
+# direction = 1
+# val = next(seq)
+# while counter < len(my_list):
+#     counter += 1
+#     if val in printed:
+#         val = seq.send(direction)
+#         print("skipped")
+#         continue
+#     printed.append(val)
+#     print(val)
+#     if val > 5:
+#         direction = -1
+#     elif val < 5:
+#         direction = 1
+#     val = seq.send(direction)
