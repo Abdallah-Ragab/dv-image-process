@@ -18,20 +18,28 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
-# for file in ["21.jpg"]:
+# for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
+for file in [
+            # "0.jpg", "8.jpg","10.jpg", "12.jpg", "14.jpg", "17.jpg",
+             "19.jpg",
+            #  "28.jpg", "30.jpg",
+             "31.jpg"]:
     image = cv2.imread(f"images/input/{file}")
     with suppress_stdout():
         person = Person(image)
-    if person.RESULTS.face.detected:
         cv2.imwrite(f"images/output/{file}", image)
+    if person.RESULTS.face.detected:
         start = time.time()
         print(f"Processing {file}:")
+        # print(person.INFO)
+        # print(person.RESULTS)
         cropped_image = Crop(image, person.INFO).crop()
         file_extension = file.split(".")[1]
         file_name = file.split(".")[0]
-        cv2.imwrite(f"images/output/{file_name}-cropped.{file_extension}", cropped_image)
-        print(f"Processing {file} took {time.time() - start} seconds")
+        if cropped_image is not None:
+            cv2.imwrite(f"images/output/{file_name}-cropped.{file_extension}", cropped_image)
+        print(f"{time.time() - start} seconds")
+        print()
 
 
 

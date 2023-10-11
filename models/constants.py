@@ -36,3 +36,6 @@ class OBJ:
             else:
                 dict_[key] = self.__dict__[key]
         return dict_
+
+    def __repr__(self) -> str:
+        return str(self.dict())
