@@ -1,27 +1,7 @@
 from models.constants import *
-import cv2, os
-import numpy
 from models import Person
-from contextlib import contextmanager
-import sys, os
+from exceptions import *
 
-class ExhaustedSequence(Exception):
-    def __init__(self, sequence_name=None):
-        message = f"Sequence {sequence_name or ''} exhausted without finding a suitable crop."
-        super().__init__(message)
-class ImageTooSlim(Exception):
-    def __init__(self):
-        message = f"The image is too slim to be cropped at the right dimensions (image width is too small)."
-        super().__init__(message)
-
-class HeadTooClose(Exception):
-    def __init__(self):
-        message = f"The head is too close to the top or bottom edges of the image."
-        super().__init__(message)
-class HeadTooHigh(Exception):
-    def __init__(self):
-        message = f"The The head is too close to the top edge of the image."
-        super().__init__(message)
 
 class Crop:
     def __init__(self, image, info):
@@ -126,7 +106,11 @@ class Crop:
         self.CROP_ATTEMPTS = 0
         try:
             for head_ratio in head_ratio_sequence:
-                eye_ratio_sequence = self.ratio_seq_generator(self.eye_level_possible_ratios, preferred_eye_level_ratio_idx, repeat=True)
+                eye_ratio_sequence = self.ratio_seq_generator(
+                    self.eye_level_possible_ratios,
+                    preferred_eye_level_ratio_idx,
+                    repeat=True,
+                )
                 head_ratio_crops = {}
                 eye_ratio = next(eye_ratio_sequence)
                 direction = 1
@@ -154,12 +138,18 @@ class Crop:
                         crops_over_padded = [
                             head_ratio_crops[ratio]
                             for ratio in head_ratio_crops
-                            if head_ratio_crops[ratio] and not isinstance(head_ratio_crops[ratio], str) and head_ratio_crops[ratio].top_padding_ratio >= preferred_top_padding
+                            if head_ratio_crops[ratio]
+                            and not isinstance(head_ratio_crops[ratio], str)
+                            and head_ratio_crops[ratio].top_padding_ratio
+                            >= preferred_top_padding
                         ]
                         crops_under_padded = [
                             head_ratio_crops[ratio]
                             for ratio in head_ratio_crops
-                            if head_ratio_crops[ratio] and not isinstance(head_ratio_crops[ratio], str) and head_ratio_crops[ratio].top_padding_ratio <= preferred_top_padding
+                            if head_ratio_crops[ratio]
+                            and not isinstance(head_ratio_crops[ratio], str)
+                            and head_ratio_crops[ratio].top_padding_ratio
+                            <= preferred_top_padding
                         ]
 
                         if crop.top_padding_ratio == preferred_top_padding:
@@ -187,9 +177,17 @@ class Crop:
                         eye_ratio = eye_ratio_sequence.send(direction)
                     except (ExhaustedSequence, StopIteration):
                         break
-                results = [head_ratio_crops[ratio] for ratio in head_ratio_crops if head_ratio_crops[ratio] and not isinstance(head_ratio_crops[ratio], str)]
+                results = [
+                    head_ratio_crops[ratio]
+                    for ratio in head_ratio_crops
+                    if head_ratio_crops[ratio]
+                    and not isinstance(head_ratio_crops[ratio], str)
+                ]
                 if len(results) > 0:
-                    results = sorted(results, key=lambda x: abs(x.top_padding_ratio - preferred_top_padding))
+                    results = sorted(
+                        results,
+                        key=lambda x: abs(x.top_padding_ratio - preferred_top_padding),
+                    )
                     return results[0]
 
         except (ExhaustedSequence, StopIteration):
@@ -211,10 +209,12 @@ class Crop:
             x_start = int(self.image.shape[1] / 2 - image_height / 2)
             x_end = int(self.image.shape[1] / 2 + image_height / 2)
             cropped_image = self.image[
-                y_start : y_end,
-                x_start : x_end,
+                y_start:y_end,
+                x_start:x_end,
             ]
-            print(f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}. \n  - head_ratio={crop_lines.head_ratio}\n  - eye_ratio={crop_lines.eye_level_ratio}\n  - top_padding_ratio={crop_lines.top_padding_ratio}")
+            print(
+                f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}. \n  - head_ratio={crop_lines.head_ratio}\n  - eye_ratio={crop_lines.eye_level_ratio}\n  - top_padding_ratio={crop_lines.top_padding_ratio}"
+            )
             return cropped_image
 
     def ratio_seq_generator(self, input_list, start=None, repeat=False):
