@@ -212,6 +212,11 @@ class Crop:
                 y_start:y_end,
                 x_start:x_end,
             ]
+            image_dimension = int(min(cropped_image.shape[0], cropped_image.shape[1]))
+            cropped_image = cropped_image[
+                0:image_dimension,
+                0:image_dimension,
+            ]
             print(
                 f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}. \n  - head_ratio={crop_lines.head_ratio}\n  - eye_ratio={crop_lines.eye_level_ratio}\n  - top_padding_ratio={crop_lines.top_padding_ratio}"
             )
