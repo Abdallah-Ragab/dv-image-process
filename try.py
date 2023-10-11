@@ -24,15 +24,11 @@ for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0]
         person = Person(image)
         cv2.imwrite(f"images/output/{file}", image)
     if person.RESULTS.face.detected:
-        start = time.time()
-        print(f"Processing {file}:")
         cropped_image = Crop(image, person.INFO).crop()
         file_extension = file.split(".")[1]
         file_name = file.split(".")[0]
         if cropped_image is not None:
             cv2.imwrite(f"images/output/{file_name}-cropped.{file_extension}", cropped_image)
-        print(f"{time.time() - start} seconds")
-        print()
 
 
 
