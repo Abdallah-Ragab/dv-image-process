@@ -25,10 +25,8 @@ class HeadTooHigh(Exception):
 
 class Crop:
     def __init__(self, image, info):
-        self.image = image
-        # self.dimensions = OBJ(x=image.shape[1], y=image.shape[0])
         self.info = info
-        self.image = self.center_face_x(self.image, self.info.face.center.x, crop=True).image
+        self.image = self.center_face_x(image, self.info.face.center.x, crop=True).image
         self.dimensions = OBJ(x=self.image.shape[1], y=self.image.shape[0])
         self.head_top = self.info.head.top
         self.head_bottom = self.info.head.bottom
@@ -137,7 +135,6 @@ class Crop:
                         self.CROP_ATTEMPTS += 1
                         if eye_ratio in head_ratio_crops:
                             eye_ratio = eye_ratio_sequence.send(direction)
-                            print("skipped")
                             continue
                         try:
                             crop = self.calculate_crop_lines(head_ratio, eye_ratio)
@@ -145,9 +142,9 @@ class Crop:
                             crop = str(e)
                             if e.__class__.__name__ not in self.CROP_ERRORS:
                                 self.CROP_ERRORS.append(e.__class__.__name__)
-                        print(
-                            f"  head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: {crop if crop else None}"
-                        )
+                        # print(
+                        #     f"  head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: {crop if crop else None}"
+                        # )
 
                         head_ratio_crops[eye_ratio] = crop
                         if not crop or isinstance(crop, str):
