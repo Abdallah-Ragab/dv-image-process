@@ -1,23 +1,21 @@
 from .constants import *
 import math
+from log_config import logger
+from exceptions import CouldNotDetect
+
 
 class Body:
-    def __init__(self, *args, **kwargs):
-        self.BODY = self.get_pose_landmarks()
-        self.SHOULDERS = self.get_shoulders_position()
-
-        super().__init__(*args, **kwargs)
-
     def get_pose_landmarks(self):
         try:
+            logger.info(f"Getting pose landmarks...")
             return POSE.process(self.image).pose_landmarks
         except Exception as e:
-            print(f"Could not detect pose landmarks: {e}")
-            return None
+            raise CouldNotDetect("pose landmarks")
 
     def get_shoulders_position(self):
         pose_index = POSE_SOLUTION.PoseLandmark
         try:
+            logger.info(f"Getting shoulders position...")
             left_shoulder = OBJ(
                 x=self.BODY.landmark[pose_index.LEFT_SHOULDER].x * self.dimensions.x,
                 y=self.BODY.landmark[pose_index.LEFT_SHOULDER].y * self.dimensions.y,
@@ -32,11 +30,12 @@ class Body:
             )
             return shoulders
         except Exception as e:
-            print (f"Could not find shoulders position: {e}")
+            logger.error(f"Could not find shoulders position: {e}")
             return None
 
     def calculate_shoulders_slope(self):
         try:
+            logger.info(f"Calculating shoulders slope...")
             shoulders_distance = math.dist((self.SHOULDERS.left.x, self.SHOULDERS.left.y), (self.SHOULDERS.right.x, self.SHOULDERS.right.y))
             shoulders_y_diff = abs(self.SHOULDERS.right.y - self.SHOULDERS.left.y)
 
@@ -44,21 +43,28 @@ class Body:
             shoulders_slope = math.degrees(angle)
             return shoulders_slope
         except Exception as e:
-            print(f"Could not calculate shoulders slope: {e}")
+            logger.error(f"Could not calculate shoulders slope: {e}")
             return None
 
     def get_body_info(self):
         try:
+            logger.info(f"Getting body info...")
+            self.BODY = self.get_pose_landmarks()
+            self.SHOULDERS = self.get_shoulders_position()
+            shoulders_slope = self.calculate_shoulders_slope()
             return OBJ(
-                # position = self.SHOULDERS,
-                slope = self.calculate_shoulders_slope()
+                position = self.SHOULDERS,
+                slope = shoulders_slope
             )
+        except CouldNotDetect as e:
+            logger.error(f"Could not get body info: {e}")
+            return None
         except Exception as e:
-            print(f"Could not get shoulders info: {e}")
+            logger.error(f"Could not get body info: {e}")
             return None
 
     def gather_info(self):
         try:
             setattr(self.INFO, "shoulders", self.get_body_info())
         except Exception as e:
-            print(f"Could not gather info in {self.__class__.__name__}: {e}")
+            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e}")
