@@ -1,4 +1,5 @@
 from .constants import *
+from exceptions import CouldNotDetect
 import numpy
 
 
@@ -28,17 +29,9 @@ class Face:
         188,
         174,
     ]
-
-    def __init__(self, *args, **kwargs):
-        self.FACE = self.get_face_landmarks()
-        self.FACE_3D = self.get_face_3d()
-        self.FACE_2D = self.get_face_2d()
-        self.NOSE_BRIDGE = self.get_nose_bridge_position()
-        self.EYES = self.get_eye_position()
-        super().__init__(*args, **kwargs)
-
     def get_face_landmarks(self):
         try:
+            logger.info(f"Getting face landmarks...")
             self.image.flags.writeable = False
             mesh = FACE_MECH.process(self.image)
             self.image.flags.writeable = True
@@ -46,11 +39,12 @@ class Face:
             self.FACES_COUNT = len(landmarks)
             return landmarks
         except Exception as e:
-            print(f"Could not find face landmarks: {e}")
-            return None
+            logger.error(f"Could not find face landmarks: {e}")
+            raise CouldNotDetect("face landmarks")
 
     def get_face_3d(self):
         try:
+            logger.trace(f"Getting face 3D position...")
             face_3d = numpy.array(
                 [
                     [
@@ -66,11 +60,12 @@ class Face:
             return face_3d
 
         except Exception as e:
-            print(f"Could not find face 3D: {e}")
+            logger.error(f"Could not find face 3D: {e}")
             return None
 
     def get_face_2d(self):
         try:
+            logger.trace(f"Getting face 2D position...")
             face_2d = numpy.array(
                 [
                     [landmark.x * self.dimensions.x, landmark.y * self.dimensions.y]
@@ -81,11 +76,12 @@ class Face:
             )
             return face_2d
         except Exception as e:
-            print(f"Could not find face 2D: {e}")
+            logger.error(f"Could not find face 2D: {e}")
             return None
 
     def get_nose_bridge_position(self):
         try:
+            logger.trace(f"Getting nose bridge position...")
             nose_bridge = numpy.array(
                 [
                     [landmark.x * self.dimensions.x, landmark.y * self.dimensions.y]
@@ -96,11 +92,12 @@ class Face:
             )
             return nose_bridge
         except Exception as e:
-            print(f"Could not find nose bridge position: {e}")
+            logger.error(f"Could not find nose bridge position: {e}")
             return None
 
     def get_eye_position(self):
         try:
+            logger.trace(f"Getting eye position...")
             eye = numpy.array(
                 [
                     [landmark.x * self.dimensions.x, landmark.y * self.dimensions.y]
@@ -111,30 +108,33 @@ class Face:
             )
             return eye
         except Exception as e:
-            print(f"Could not find eye position: {e}")
+            logger.error(f"Could not find eye position: {e}")
             return None
 
     def get_eye_level(self):
         try:
+            logger.trace("Calculating eye level...")
             ys = self.EYES[:, 1]
             eye_level = (ys[0] + ys[1]) / 2
             return eye_level
         except Exception as e:
-            print(f"Could not find eye level: {e}")
+            logger.error(f"Could not find eye level: {e}")
             return None
 
     def get_face_center(self):
+        logger.trace("Calculating face center...")
         try:
             return OBJ(
                 x=self.FACE[0].landmark[1].x * self.dimensions.x,
                 y=self.FACE[0].landmark[1].y * self.dimensions.y,
             )
         except Exception as e:
-            print(f"Could not find face center: {e}")
+            logger.error(f"Could not find face center: {e}")
             return None
 
     def get_face_rotation(self):
         try:
+            logger.trace(f"Getting face rotation...")
             focal_length = self.dimensions.x
             camera_center = (self.dimensions.x / 2, self.dimensions.y / 2)
             camera_matrix = numpy.array(
@@ -190,10 +190,11 @@ class Face:
             return OBJ(angles=rotational_angles, direction=direction)
 
         except Exception as e:
-            print(f"Could not find face rotation: {e}")
+            logger.error(f"Could not find face rotation: {e}")
             return None
 
     def crop_nose_bridge_image(self):
+        logger.trace("Cropping nose bridge image...")
         try:
             x = self.NOSE_BRIDGE[:, 0]
             y = self.NOSE_BRIDGE[:, 1]
@@ -204,11 +205,12 @@ class Face:
             cropped_image = self.image[y_min:y_max, x_min:x_max]
             return cropped_image
         except Exception as e:
-            print(f"Could not crop nose bridge: {e}")
+            logger.error(f"Could not crop nose bridge: {e}")
             return None
 
     def detect_glasses(self):
         try:
+            logger.trace("Detecting glasses...")
             nose_bridge = self.crop_nose_bridge_image()
             img_blur = cv2.GaussianBlur(
                 numpy.array(nose_bridge), (3, 3), sigmaX=0, sigmaY=0
@@ -227,25 +229,42 @@ class Face:
             else:
                 return False
         except Exception as e:
-            print(f"Could not detect glasses: {e}")
+            logger.error(f"Could not detect glasses: {e}")
             return None
 
     def get_face_info(self):
         try:
+            logger.info(f"Getting face info...")
+            self.FACE = self.get_face_landmarks()
+            self.FACE_3D = self.get_face_3d()
+            self.FACE_2D = self.get_face_2d()
+            self.NOSE_BRIDGE = self.get_nose_bridge_position()
+            self.EYES = self.get_eye_position()
+
+            face_rotation = self.get_face_rotation()
+            glasses_detection = self.detect_glasses()
+            eye_level = self.get_eye_level()
+            face_center = self.get_face_center()
+
             return OBJ(
-                rotation=self.get_face_rotation(),
+                rotation=face_rotation,
                 position=OBJ(_3D=self.FACE_3D, _2D=self.FACE_2D),
                 count=self.FACES_COUNT,
-                glasses=self.detect_glasses(),
-                eyes=OBJ(level=self.get_eye_level(), position=self.EYES),
-                center=self.get_face_center(),
+                glasses=glasses_detection,
+                eyes=OBJ(level=eye_level, position=self.EYES),
+                center=face_center,
             )
+
+        except CouldNotDetect as e:
+            logger.error(f"Could not get face info: {e}")
+            return None
+
         except Exception as e:
-            print(f"Could not get face info: {e}")
+            logger.error(f"Could not get face info: {e}")
             return None
 
     def gather_info(self):
         try:
             setattr(self.INFO, "face", self.get_face_info())
         except Exception as e:
-            print(f"Could not gather info in {self.__class__.__name__}: {e}")
+            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e}")
