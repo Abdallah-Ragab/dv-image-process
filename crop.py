@@ -19,6 +19,7 @@ class Crop:
         self.eye_level_possible_ratios = range(56, 69 - self.eye_error_margin, 1)
 
     def calculate_crop_lines(self, head_percentage, eye_to_bottom_percentage):
+        logger.trace(f"Calculating crop lines for head ratio: {head_percentage} and eye to bottom ratio: {eye_to_bottom_percentage}...")
         full_height = self.head_height / (head_percentage / 100)
         if full_height > self.dimensions.x:
             raise ImageTooSlim
@@ -61,33 +62,38 @@ class Crop:
                     yield crop_lines
 
     def center_face_x(self, image, face_center, crop=False, draw=False):
-        right_side = image.shape[1] - face_center
-        left_side = face_center
-        crop_size_side = min(right_side, left_side)
-        crop_start = face_center - crop_size_side
-        crop_end = face_center + crop_size_side
-        if draw:
-            cv2.line(
-                image,
-                (int(crop_start), 0),
-                (int(crop_start), image.shape[0]),
-                (0, 255, 0),
-                2,
-            )
-            cv2.line(
-                image,
-                (int(crop_end), 0),
-                (int(crop_end), image.shape[0]),
-                (0, 255, 0),
-                2,
-            )
-        if crop:
-            return OBJ(
-                image=image[:, int(crop_start) : int(crop_end)],
-                start=crop_start,
-                end=crop_end,
-            )
-        return OBJ(image=image, start=crop_start, end=crop_end)
+        logger.trace(f"Centering face...")
+        try:
+            right_side = image.shape[1] - face_center
+            left_side = face_center
+            crop_size_side = min(right_side, left_side)
+            crop_start = face_center - crop_size_side
+            crop_end = face_center + crop_size_side
+            if draw:
+                cv2.line(
+                    image,
+                    (int(crop_start), 0),
+                    (int(crop_start), image.shape[0]),
+                    (0, 255, 0),
+                    2,
+                )
+                cv2.line(
+                    image,
+                    (int(crop_end), 0),
+                    (int(crop_end), image.shape[0]),
+                    (0, 255, 0),
+                    2,
+                )
+            if crop:
+                return OBJ(
+                    image=image[:, int(crop_start) : int(crop_end)],
+                    start=crop_start,
+                    end=crop_end,
+                )
+            return OBJ(image=image, start=crop_start, end=crop_end)
+        except Exception as e:
+            logger.error(f"Failed to center face: {e}")
+            return None
 
     def elect_best_crop(self):
         preferred_head_ratio = 50
@@ -126,9 +132,7 @@ class Crop:
                             crop = str(e)
                             if e.__class__.__name__ not in self.CROP_ERRORS:
                                 self.CROP_ERRORS.append(e.__class__.__name__)
-                        # print(
-                        #     f"  head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: {crop if crop else None}"
-                        # )
+                        logger.trace(f"head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: ({crop.top:.2f if crop else None}, {crop.bottom:.2f if crop else None})")
 
                         head_ratio_crops[eye_ratio] = crop
                         if not crop or isinstance(crop, str):
@@ -191,16 +195,15 @@ class Crop:
                     return results[0]
 
         except (ExhaustedSequence, StopIteration):
-            pass
+            logger.trace(f"Exhausted all crop possibilities.")
 
         return None
 
     def crop(self):
+        logger.info(f"Attempting to crop image...")
         crop_lines = self.elect_best_crop()
         if not crop_lines:
-            print(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: ")
-            for error in self.CROP_ERRORS:
-                print(f"  - {str(error)}")
+            logger.error(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: {[str(error)+', '  for error in self.CROP_ERRORS].join('')}")
             return None
         else:
             image_height = crop_lines.bottom - crop_lines.top
@@ -217,9 +220,8 @@ class Crop:
                 0:image_dimension,
                 0:image_dimension,
             ]
-            print(
-                f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}. \n  - head_ratio={crop_lines.head_ratio}\n  - eye_ratio={crop_lines.eye_level_ratio}\n  - top_padding_ratio={crop_lines.top_padding_ratio}"
-            )
+            logger.success(f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}.")
+            logger.trace(f"head height ratio:{crop_lines.head_ratio} eye to chin ratio:{crop_lines.eye_level_ratio} top padding ratio:{crop_lines.top_padding_ratio} bottom padding ratio:{crop_lines.bottom_padding_ratio}")
             return cropped_image
 
     def ratio_seq_generator(self, input_list, start=None, repeat=False):
