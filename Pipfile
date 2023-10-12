@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 mediapipe = "*"
 opencv-contrib-python = "*"
+exifread = "*"
+loguru = "*"
 
 [dev-packages]
 

@@ -1,3 +1,8 @@
+class CouldNotDetect(Exception):
+    def __init__(self, object_name=None):
+        message = f"Failed to detect {object_name or '.'}"
+        super().__init__(message)
+
 class ExhaustedSequence(Exception):
     def __init__(self, sequence_name=None):
         message = f"Sequence {sequence_name or ''} exhausted without finding a suitable crop."
@@ -14,4 +19,9 @@ class HeadTooClose(Exception):
 class HeadTooHigh(Exception):
     def __init__(self):
         message = f"The The head is too close to the top edge of the image."
+        super().__init__(message)
+
+class SaveError(Exception):
+    def __init__(self, reason=None):
+        message = f"Saving Image Failed {reason or '.'}"
         super().__init__(message)
