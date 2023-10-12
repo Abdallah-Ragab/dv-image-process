@@ -20,7 +20,7 @@ class Head:
 
     def get_top_of_head(self):
         try:
-            logger.trace(f"Getting top of head position...")
+            logger.info(f"Getting top of head position...")
             mask = self.PERSON_MASK
             top_of_head = numpy.where(mask == 1)
             top_of_head = top_of_head[0].min()
@@ -31,7 +31,7 @@ class Head:
 
     def get_bottom_of_head(self):
         try:
-            logger.trace(f"Getting bottom of head position...")
+            logger.info(f"Getting bottom of head position...")
             y_values = self.FACE_2D[:, 1]
             return numpy.max(y_values)
         except Exception as e:
