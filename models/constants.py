@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+from log_config import logger
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
