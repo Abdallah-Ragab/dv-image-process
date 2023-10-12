@@ -24,14 +24,14 @@ class Body:
                 x=self.BODY.landmark[pose_index.RIGHT_SHOULDER].x * self.dimensions.x,
                 y=self.BODY.landmark[pose_index.RIGHT_SHOULDER].y * self.dimensions.y,
             )
-            shoulders = OBJ(
+            return OBJ(
+                success = True,
                 left = left_shoulder,
                 right = right_shoulder
             )
-            return shoulders
         except Exception as e:
             logger.error(f"Could not find shoulders position: {e}")
-            return None
+            return OBJ(success=False)
 
     def calculate_shoulders_slope(self):
         try:
@@ -53,6 +53,7 @@ class Body:
             self.SHOULDERS = self.get_shoulders_position()
             shoulders_slope = self.calculate_shoulders_slope()
             return OBJ(
+                success = self.SHOULDERS.success,
                 position = self.SHOULDERS,
                 slope = shoulders_slope
             )
