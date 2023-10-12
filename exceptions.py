@@ -23,5 +23,5 @@ class HeadTooHigh(Exception):
 
 class SaveError(Exception):
     def __init__(self, reason=None):
-        message = f"Saving Image Failed {reason or '.'}"
+        message = f"Saving Image Failed. {reason if reason else ''}"
         super().__init__(message)
