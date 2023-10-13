@@ -219,7 +219,7 @@ class Crop:
         crop_lines = self.elect_best_crop()
         if not crop_lines:
             logger.error(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: {', '.join(self.CROP_ERRORS)}")
-            return None
+            return OBJ(success=False)
         else:
             image_height = crop_lines.bottom - crop_lines.top
             y_start = int(crop_lines.top)
@@ -237,7 +237,15 @@ class Crop:
             ]
             logger.success(f"Cropped image successfully. Attempts: {self.CROP_ATTEMPTS}.")
             logger.trace(f"head height ratio:{crop_lines.head_ratio} eye to chin ratio:{crop_lines.eye_level_ratio} top padding ratio:{crop_lines.top_padding_ratio} bottom padding ratio:{crop_lines.bottom_padding_ratio}")
-            return cropped_image
+            return OBJ(
+                success=True,
+                image=cropped_image,
+                head_ratio=crop_lines.head_ratio,
+                eye_level_ratio=crop_lines.eye_level_ratio,
+                top_padding_ratio=crop_lines.top_padding_ratio,
+                bottom_padding_ratio=crop_lines.bottom_padding_ratio,
+                dimensions=OBJ(x=image_dimension, y=image_dimension),
+            )
 
     def ratio_seq_generator(self, input_list, start=None, repeat=False):
         index = start if start is not None else 0
