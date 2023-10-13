@@ -76,7 +76,7 @@ def compress(input_image, output_dir, output_filename = None, min_resolution=600
         # Save the final compressed image
         img.save(output_path, format="JPEG", quality=quality)
         logger.success(f"Image saved with quality {quality} and size {buffer_size / 1024} KB to {output_path}")
-        return OBJ(success=True, path=output_path, size=buffer_size / 1024, quality=quality, dimensions=OBJ(width=new_width, height=new_height))
+        return OBJ(success=True, path=output_path, size=buffer_size / 1024, quality=quality, dimensions=OBJ(x=new_width, y=new_height))
 
     except Exception as e:
         raise SaveError(f'{e.__traceback__.tb_lineno}:{e}')
