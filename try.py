@@ -21,43 +21,38 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 from log_config import logger
-for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
+
+def process_image(file_path, output_dir):
     start = time.time()
-    image = cv2.imread(f"images/input/{file}")
-    logger.info(f"Processing image: {file}...")
+    file_name = Path(file_path).name
+    image = cv2.imread(file_path)
+    logger.info(f"Processing image: {file_name}...")
     person = Person(image)
+    cropped_image = None
+    saved_image = None
     if person.RESULTS.face.detected:
-        crop_obj = Crop(image, person.INFO)
-        cropped_image = crop_obj.crop()
-        if cropped_image is not None:
-            try:
-                output_dir = Path.joinpath(Path.cwd(), "images/output")
-                output_filename = file
-                saved = compress(cropped_image, "images/output", output_filename=output_filename)
-                if not saved:
-                    raise SaveError()
-                end = time.time()
-                logger.success(f"Image {file} processed successfully. Time taken: {end - start} seconds.")
-            except SaveError as e:
-                logger.error(f"Image {file} failed to process. {e.__traceback__.tb_lineno}:{e}")
+        cropped_image = Crop(image, person.INFO).crop()
+        if cropped_image.success:
+            saved_image = compress(cropped_image.image, output_dir, output_filename=file_name, quality_suffix=True)
+            end = time.time()
+            if not saved_image.success:
+                logger.error(f"Image {file_name} failed to process. . Time taken: {end - start} seconds.")
+            else:
+                logger.success(f"Image {file_name} processed successfully. Time taken: {end - start} seconds.")
         else:
             end = time.time()
-            logger.error(f"Image {file} failed to process. Could not crop the image. Reasons:{', '.join([str(i) for i in crop_obj.CROP_ERRORS])} Time taken: {end - start} seconds.")
+            logger.error(f"Image {file_name} failed to process. Could not crop the image. Reasons:{', '.join([str(i) for i in cropped_image.errors])} Time taken: {end - start} seconds.")
     else:
         end = time.time()
-        logger.error(f"Image {file} failed to process. No face detected. Time taken: {end - start} seconds.")
+        logger.error(f"Image {file_name} failed to process. No face detected. Time taken: {end - start} seconds.")
+
     log = {
-        'file' : file,
-        "results" : person.RESULTS.dict(),
-        "info" : person.INFO.dict(),
-        'saved' : saved is not None if cropped_image is not None else None,
-        'path' : saved.path if cropped_image is not None else None,
-        'crop_errors' : crop_obj.CROP_ERRORS,
-        'cropped' : cropped_image is not None,
-        'time_taken' : end - start,
-        'image_size' : saved.size if cropped_image is not None else None,
-        'image_quality' : saved.quality if cropped_image is not None else None,
-        'image_height' : saved.dimensions.height if cropped_image is not None else None,
-        'image_width' : saved.dimensions.width if cropped_image is not None else None,
+        'file' : file_name,
+        "detection" : person.INFO.dict(),
+        "tests" : person.RESULTS.dict(),
+        "crop" : cropped_image.dict() if cropped_image is not None else None,
+        'save' : saved_image.dict() if saved_image is not None else None,
     }
     logger.trace(log)
+    return log
+
