@@ -8,6 +8,8 @@ mediapipe = "*"
 opencv-contrib-python = "*"
 exifread = "*"
 loguru = "*"
+boto3 = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
