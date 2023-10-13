@@ -70,7 +70,7 @@ def compress(input_image, output_dir, output_filename = None, min_resolution=600
                 break
             quality -= 5
 
-        output_filename = f"{file_name}{'_' + quality if quality_suffix else ''}.{file_extension}"
+        output_filename = f"{file_name}{'_' + str(quality) if quality_suffix else ''}.{file_extension}"
         output_path = os.path.join(output_dir, output_filename)
 
         # Save the final compressed image
