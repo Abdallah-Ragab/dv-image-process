@@ -30,7 +30,7 @@ class Body:
                 right = right_shoulder
             )
         except Exception as e:
-            logger.error(f"Could not find shoulders position: {e}")
+            logger.error(f"Could not find shoulders position: {e.__traceback__.tb_lineno}:{e}")
             return OBJ(success=False)
 
     def calculate_shoulders_slope(self):
@@ -43,7 +43,7 @@ class Body:
             shoulders_slope = math.degrees(angle)
             return shoulders_slope
         except Exception as e:
-            logger.error(f"Could not calculate shoulders slope: {e}")
+            logger.error(f"Could not calculate shoulders slope: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_body_info(self):
@@ -58,14 +58,14 @@ class Body:
                 slope = shoulders_slope
             )
         except CouldNotDetect as e:
-            logger.error(f"Could not get body info: {e}")
+            logger.error(f"Could not get body info: {e.__traceback__.tb_lineno}:{e}")
             return None
         except Exception as e:
-            logger.error(f"Could not get body info: {e}")
+            logger.error(f"Could not get body info: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def gather_info(self):
         try:
             setattr(self.INFO, "shoulders", self.get_body_info())
         except Exception as e:
-            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e}")
+            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e.__traceback__.tb_lineno}:{e}")

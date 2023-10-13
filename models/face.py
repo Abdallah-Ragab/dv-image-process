@@ -40,7 +40,7 @@ class Face:
             logger.success(f"Found {self.FACES_COUNT} faces.")
             return landmarks
         except Exception as e:
-            logger.error(f"Failed to find face landmarks: {e}")
+            logger.error(f"Failed to find face landmarks: {e.__traceback__.tb_lineno}:{e}")
             raise CouldNotDetect("face landmarks")
 
     def get_face_3d(self):
@@ -62,7 +62,7 @@ class Face:
             return face_3d
 
         except Exception as e:
-            logger.error(f"Failed to find face 3D: {e}")
+            logger.error(f"Failed to find face 3D: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_face_2d(self):
@@ -79,7 +79,7 @@ class Face:
             logger.success(f"Face 2D position found successfully.")
             return face_2d
         except Exception as e:
-            logger.error(f"Failed to find face 2D: {e}")
+            logger.error(f"Failed to find face 2D: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_nose_bridge_position(self):
@@ -96,7 +96,7 @@ class Face:
             logger.success(f"Nose bridge position found successfully.")
             return nose_bridge
         except Exception as e:
-            logger.error(f"Failed to find nose bridge position: {e}")
+            logger.error(f"Failed to find nose bridge position: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_eye_position(self):
@@ -113,7 +113,7 @@ class Face:
             logger.success(f"Eye position found successfully.")
             return eye
         except Exception as e:
-            logger.error(f"Failed to find eye position: {e}")
+            logger.error(f"Failed to find eye position: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_eye_level(self):
@@ -124,7 +124,7 @@ class Face:
             logger.success(f"Eye level found: {eye_level}")
             return eye_level
         except Exception as e:
-            logger.error(f"Failed to find eye level: {e}")
+            logger.error(f"Failed to find eye level: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_face_center(self):
@@ -137,7 +137,7 @@ class Face:
             logger.success(f"Face center found: {center}")
             return center
         except Exception as e:
-            logger.error(f"Failed to find face center: {e}")
+            logger.error(f"Failed to find face center: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_face_rotation(self):
@@ -199,7 +199,7 @@ class Face:
             return OBJ(angles=rotational_angles, direction=direction, success=True)
 
         except Exception as e:
-            logger.error(f"Failed to calculate face rotation: {e}")
+            logger.error(f"Failed to calculate face rotation: {e.__traceback__.tb_lineno}:{e}")
             return OBJ(success=False)
 
     def crop_nose_bridge_image(self):
@@ -215,7 +215,7 @@ class Face:
             logger.success("Nose bridge image cropped successfully.")
             return cropped_image
         except Exception as e:
-            logger.error(f"Failed to crop nose bridge: {e}")
+            logger.error(f"Failed to crop nose bridge: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def detect_glasses(self):
@@ -241,7 +241,7 @@ class Face:
                 logger.success("No glasses detected")
                 return OBJ(success=True, detected=False)
         except Exception as e:
-            logger.error(f"Failed to detect glasses: {e}")
+            logger.error(f"Failed to detect glasses: {e.__traceback__.tb_lineno}:{e}")
             return OBJ(success=False)
 
     def get_face_info(self):
@@ -275,15 +275,15 @@ class Face:
             )
 
         except CouldNotDetect as e:
-            logger.error(f"Failed to get face info: {e}")
-            return OBJ(success=False)
+            logger.error(f"Failed to get face info: {e.__traceback__.tb_lineno}:{e}")
+            return OBJ(success=False, glasses=OBJ(success=False))
 
         except Exception as e:
-            logger.error(f"Failed to get face info: {e}")
-            return OBJ(success=False)
+            logger.error(f"Failed to get face info: {e.__traceback__.tb_lineno}:{e}")
+            return OBJ(success=False, glasses=OBJ(success=False))
 
     def gather_info(self):
         try:
             setattr(self.INFO, "face", self.get_face_info())
         except Exception as e:
-            logger.critical(f"Failed to gather info in {self.__class__.__name__}: {e}")
+            logger.critical(f"Failed to gather info in {self.__class__.__name__}: {e.__traceback__.tb_lineno}:{e}")

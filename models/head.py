@@ -26,7 +26,7 @@ class Head:
             top_of_head = top_of_head[0].min()
             return top_of_head
         except Exception as e:
-            logger.error(f"Could not get top of head: {e}")
+            logger.error(f"Could not get top of head: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_bottom_of_head(self):
@@ -35,7 +35,7 @@ class Head:
             y_values = self.FACE_2D[:, 1]
             return numpy.max(y_values)
         except Exception as e:
-            logger.error(f"Could not get bottom of head: {e}")
+            logger.error(f"Could not get bottom of head: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def get_head_info(self):
@@ -47,14 +47,14 @@ class Head:
             head_info = OBJ(top=top_of_head, bottom=bottom_of_head, success=True)
             return head_info
         except CouldNotDetect as e:
-            logger.error(f"Could not get head info: {e}")
+            logger.error(f"Could not get head info: {e.__traceback__.tb_lineno}:{e}")
             return OBJ(success=False)
         except Exception as e:
-            logger.error(f"Could not get head info: {e}")
+            logger.error(f"Could not get head info: {e.__traceback__.tb_lineno}:{e}")
             return OBJ(success=False)
 
     def gather_info(self):
         try:
             setattr(self.INFO, "head", self.get_head_info())
         except Exception as e:
-            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e}")
+            logger.critical(f"Could not gather info in {self.__class__.__name__}: {e.__traceback__.tb_lineno}:{e}")
