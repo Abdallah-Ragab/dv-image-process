@@ -92,10 +92,11 @@ class Crop:
                 )
             return OBJ(image=image, start=crop_start, end=crop_end)
         except Exception as e:
-            logger.error(f"Failed to center face: {e}")
+            logger.error(f"Failed to center face: {e.__traceback__.tb_lineno}:{e}")
             return None
 
     def elect_best_crop(self):
+        logger.info(f"Electing best crop possibility...")
         preferred_head_ratio = 50
         preferred_eye_level_ratio = 60
         preferred_top_padding = 10
@@ -123,16 +124,19 @@ class Crop:
                 while len(head_ratio_crops) < len(self.eye_level_possible_ratios):
                     try:
                         self.CROP_ATTEMPTS += 1
+                        crop = None
                         if eye_ratio in head_ratio_crops:
                             eye_ratio = eye_ratio_sequence.send(direction)
                             continue
                         try:
                             crop = self.calculate_crop_lines(head_ratio, eye_ratio)
+                            logger.trace(f"Crop: ({crop.top if crop else 'Error Occurred'}, {crop.bottom if crop else 'Error Occurred'})")
                         except (ImageTooSlim, HeadTooClose, HeadTooHigh) as e:
-                            crop = str(e)
                             if e.__class__.__name__ not in self.CROP_ERRORS:
                                 self.CROP_ERRORS.append(e.__class__.__name__)
-                        logger.trace(f"head_ratio={head_ratio}, eye_ratio={eye_ratio}. Crop: ({crop.top:.2f if crop else None}, {crop.bottom:.2f if crop else None})")
+                            logger.trace(f"Crop: {e.__traceback__.tb_lineno}:{e}")
+                        except Exception as e:
+                            logger.error(f"Failed to calculate crop lines: {e.__traceback__.tb_lineno}:{e}")
 
                         head_ratio_crops[eye_ratio] = crop
                         if not crop or isinstance(crop, str):
@@ -155,9 +159,9 @@ class Crop:
                             and head_ratio_crops[ratio].top_padding_ratio
                             <= preferred_top_padding
                         ]
-
-                        if crop.top_padding_ratio == preferred_top_padding:
-                            return crop
+                        if crop:
+                            if crop.top_padding_ratio == preferred_top_padding:
+                                return crop
 
                         if len(crops_over_padded) > 0 and len(crops_under_padded) > 0:
                             over_padded = crops_over_padded[0]
@@ -174,13 +178,23 @@ class Crop:
                             else:
                                 return under_padded
 
-                        if crop.top_padding_ratio > preferred_top_padding:
-                            direction = -1
-                        else:
-                            direction = 1
-                        eye_ratio = eye_ratio_sequence.send(direction)
+                        if crop:
+                            if crop.top_padding_ratio > preferred_top_padding:
+                                direction = -1
+                            else:
+                                direction = 1
+                            eye_ratio = eye_ratio_sequence.send(direction)
+
+                        if self.CROP_ATTEMPTS > 200:
+                            raise MaxAttemptsExceeded
                     except (ExhaustedSequence, StopIteration):
                         break
+                    except Exception as e:
+                        logger.error(f"Failed to calculate crop lines for head_ratio={head_ratio}, eye_ratio={eye_ratio}: {e.__traceback__.tb_lineno}:{e}")
+                        eye_ratio = eye_ratio_sequence.send(direction)
+                        if self.CROP_ATTEMPTS > 200:
+                            raise MaxAttemptsExceeded
+                        continue
                 results = [
                     head_ratio_crops[ratio]
                     for ratio in head_ratio_crops
@@ -194,8 +208,9 @@ class Crop:
                     )
                     return results[0]
 
+
         except (ExhaustedSequence, StopIteration):
-            logger.trace(f"Exhausted all crop possibilities.")
+            logger.error(f"Failed to elect a crop: exhausted all crop possibilities.")
 
         return None
 
@@ -203,7 +218,7 @@ class Crop:
         logger.info(f"Attempting to crop image...")
         crop_lines = self.elect_best_crop()
         if not crop_lines:
-            logger.error(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: {[str(error)+', '  for error in self.CROP_ERRORS].join('')}")
+            logger.error(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: {', '.join(self.CROP_ERRORS)}")
             return None
         else:
             image_height = crop_lines.bottom - crop_lines.top
