@@ -219,7 +219,7 @@ class Crop:
         crop_lines = self.elect_best_crop()
         if not crop_lines:
             logger.error(f"Failed to crop image. Attempts: {self.CROP_ATTEMPTS}. Reasons: {', '.join(self.CROP_ERRORS)}")
-            return OBJ(success=False)
+            return OBJ(success=False, errors=self.CROP_ERRORS)
         else:
             image_height = crop_lines.bottom - crop_lines.top
             y_start = int(crop_lines.top)
@@ -245,6 +245,7 @@ class Crop:
                 top_padding_ratio=crop_lines.top_padding_ratio,
                 bottom_padding_ratio=crop_lines.bottom_padding_ratio,
                 dimensions=OBJ(x=image_dimension, y=image_dimension),
+                errors=self.CROP_ERRORS
             )
 
     def ratio_seq_generator(self, input_list, start=None, repeat=False):
