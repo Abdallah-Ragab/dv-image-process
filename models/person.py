@@ -23,6 +23,7 @@ class Person(Face, Body, Head):
         face_passed = self.face_passed()
         glasses_passed = self.glasses_passed()
         shoulders_passed = self.shoulders_passed()
+        errors = self.get_errors()
 
         if self.INFO.shoulders.success:
             passed = (face_passed and glasses_passed and shoulders_passed)
@@ -33,7 +34,8 @@ class Person(Face, Body, Head):
             passed = passed,
             face = OBJ(passed = face_passed, detected = self.INFO.face.success),
             glasses = OBJ(passed = glasses_passed, detected = self.INFO.face.glasses.success),
-            shoulders = OBJ(passed = shoulders_passed, detected = self.INFO.shoulders.success)
+            shoulders = OBJ(passed = shoulders_passed, detected = self.INFO.shoulders.success),
+            errors = errors
         )
 
     def face_passed(self):
@@ -63,3 +65,27 @@ class Person(Face, Body, Head):
             return abs(float(shoulders_slope)) < 3
         else:
             return False
+
+    def get_errors(self):
+        errors = []
+        if not self.RESULTS.face.detected:
+            errors.append({
+                "code" : "NO_FACE",
+                "message" : "Could not detect a face in the image. Try removing any obstructions and try again."
+            })
+        if not self.RESULTS.face.passed:
+            errors.append({
+                "code" : "FACE_NOT_STRAIGHT",
+                "message" : "You are not looking straight at the camera. Please try again."
+            })
+        if not self.RESULTS.glasses.passed:
+            errors.append({
+                "code" : "GLASSES",
+                "message" : "Glasses detected. Please remove your glasses and try again."
+            })
+        if not self.RESULTS.shoulders.passed:
+            errors.append({
+                "code" : "SHOULDERS",
+                "message" : "You are not facing the camera. Try standing straight and facing the camera."
+            })
+        return errors
