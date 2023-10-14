@@ -30,21 +30,25 @@ def process_image(file_path, output_dir):
     person = Person(image)
     cropped_image = None
     saved_image = None
-    if person.RESULTS.face.detected:
-        cropped_image = Crop(image, person.INFO).crop()
-        if cropped_image.success:
-            saved_image = compress(cropped_image.image, output_dir, output_filename=file_name, quality_suffix=True)
-            end = time.time()
-            if not saved_image.success:
-                logger.error(f"Image {file_name} failed to process. . Time taken: {end - start} seconds.")
+    if person.RESULTS.passed:
+        if person.RESULTS.face.detected:
+            cropped_image = Crop(image, person.INFO).crop()
+            if cropped_image.success:
+                saved_image = compress(cropped_image.image, output_dir, output_filename=file_name, quality_suffix=True)
+                end = time.time()
+                if not saved_image.success:
+                    logger.error(f"Image {file_name} failed to process. . Time taken: {end - start} seconds.")
+                else:
+                    logger.success(f"Image {file_name} processed successfully. Time taken: {end - start} seconds.")
             else:
-                logger.success(f"Image {file_name} processed successfully. Time taken: {end - start} seconds.")
+                end = time.time()
+                logger.error(f"Image {file_name} failed to process. Could not crop the image. Reasons:{', '.join([str(i) for i in cropped_image.errors])} Time taken: {end - start} seconds.")
         else:
             end = time.time()
-            logger.error(f"Image {file_name} failed to process. Could not crop the image. Reasons:{', '.join([str(i) for i in cropped_image.errors])} Time taken: {end - start} seconds.")
+            logger.error(f"Image {file_name} failed to process. No face detected. Time taken: {end - start} seconds.")
     else:
         end = time.time()
-        logger.error(f"Image {file_name} failed to process. No face detected. Time taken: {end - start} seconds.")
+        logger.error(f"Image {file_name} failed to process. Did not pass the tests. Reasons:{', '.join([str(i) for i in person.RESULTS.errors])} Time taken: {end - start} seconds.")
 
     log = {
         'file' : file_name,
@@ -56,3 +60,5 @@ def process_image(file_path, output_dir):
     logger.trace(log)
     return log
 
+for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
+    process_image(os.path.join("images/input", file), "images/output")

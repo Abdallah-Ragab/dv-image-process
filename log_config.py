@@ -18,5 +18,5 @@ universal_format = "{extra[relpath]: <12} | {time:YYYY-MM-DD at HH:mm:ss} | <lev
 today = datetime.datetime.now().strftime("%Y-%m-%d")
 
 log_file_path = f"logs/{today}.log"
-logger.add(log_file_path, rotation="1 day", level="DEBUG", format=universal_format, compression="zip")
+logger.add(log_file_path, rotation="1 day", level="TRACE", format=universal_format, compression="zip")
 logger.add(sys.stdout, level="DEBUG", format=universal_format, colorize=True)
