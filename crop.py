@@ -245,7 +245,7 @@ class Crop:
                 top_padding_ratio=crop_lines.top_padding_ratio,
                 bottom_padding_ratio=crop_lines.bottom_padding_ratio,
                 dimensions=OBJ(x=image_dimension, y=image_dimension),
-                errors=self.CROP_ERRORS
+                errors=self.get_errors(),
             )
 
     def ratio_seq_generator(self, input_list, start=None, repeat=False):
@@ -259,3 +259,25 @@ class Crop:
                 raise ExhaustedSequence
             _step = step if step is not None and isinstance(step, int) else 1
             index += _step
+
+    def get_errors(self):
+        errors = []
+        if "ImageTooSlim" in self.CROP_ERRORS:
+            errors.append({
+                "code": "image_too_slim",
+                "message": "The image is too slim to be cropped at the right dimensions (image width is too small).",
+                "message_ar": "لا يمكن قص الصورة بالأبعاد المطلوبة (عرضالصورة صغير جداً)."
+            })
+        elif "HeadTooClose" in self.CROP_ERRORS:
+            errors.append({
+                "code": "head_too_close",
+                "message": "The head is too close to the top or bottom edges of the image.",
+                "message_ar": "لا يمكن قص الصورة بالأبعاد المطلوبة (الرأس قريب جداً من حواف الصورة)."
+            })
+        elif "HeadTooHigh" in self.CROP_ERRORS:
+            errors.append({
+                "code": "head_too_high",
+                "message": "The head is too close to the top edge of the image.",
+                "message_ar": "لا يمكن قص الصورة بالأبعاد المطلوبة (الرأس قريب جداً من حافة الصورة العلوية)."
+            })
+        return errors
