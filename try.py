@@ -8,7 +8,7 @@ from log_config import logger
 from save import compress
 from exceptions import SaveError
 from pathlib import Path
-
+from filters import blur
 
 @contextmanager
 def suppress_stdout():
@@ -35,6 +35,8 @@ def process_image(file_path, output_dir):
             cropped_image = Crop(image, person.INFO).crop()
             if cropped_image.success:
                 saved_image = compress(cropped_image.image, output_dir, output_filename=file_name, quality_suffix=True)
+                blurred_image = blur(cropped_image.image)
+                cv2.imwrite(os.path.join(output_dir, file_name.split('.')[0] + "_blurred." + file_name.split('.')[-1]), blurred_image)
                 end = time.time()
                 if not saved_image.success:
                     logger.error(f"Image {file_name} failed to process. . Time taken: {end - start} seconds.")
@@ -48,7 +50,7 @@ def process_image(file_path, output_dir):
             logger.error(f"Image {file_name} failed to process. No face detected. Time taken: {end - start} seconds.")
     else:
         end = time.time()
-        logger.error(f"Image {file_name} failed to process. Did not pass the tests. Reasons:{', '.join([str(i) for i in person.RESULTS.errors])} Time taken: {end - start} seconds.")
+        logger.error(f"Image {file_name} failed to process. Did not pass the tests. Reasons:{', '.join([str(err['message']) for err in person.RESULTS.errors])} Time taken: {end - start} seconds.")
 
     log = {
         'file' : file_name,
@@ -60,5 +62,7 @@ def process_image(file_path, output_dir):
     logger.trace(log)
     return log
 
-for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
-    process_image(os.path.join("images/input", file), "images/output")
+# for file in sorted(os.listdir("images/input"), key=lambda x: int(x.split(".")[0])):
+#     process_image(os.path.join("images/input", file), "images/output")
+
+process_image(os.path.join("images/input", "2.jpg"), "images/output")

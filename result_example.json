@@ -1,0 +1,146 @@
+{
+       "file": "21.jpg",
+       "detection": {
+              "face": {
+                     "success": "True",
+                     "rotation": {
+                            "angles": {
+                                   "x": 3.6037313800004,
+                                   "y": -0.1415218245217727,
+                                   "z": -0.03146486604979167
+                            },
+                            "direction": "Slightly Up",
+                            "success": "True"
+                     },
+                     "position": {
+                            "_3D": [
+                                   [
+                                          1.40839912e+03,
+                                          1.07102311e+03,
+                                          -4.94066030e-02
+                                   ],
+                                   [
+                                          1.18429038e+03,
+                                          9.57505043e+02,
+                                          1.53695885e-02
+                                   ],
+                                   [
+                                          1.34151197e+03,
+                                          1.23296090e+03,
+                                          -8.22271127e-03
+                                   ],
+                                   [
+                                          1.45490659e+03,
+                                          1.34595504e+03,
+                                          -1.78066883e-02
+                                   ],
+                                   [
+                                          1.56104308e+03,
+                                          8.94845221e+02,
+                                          2.56192107e-02
+                                   ],
+                                   [
+                                          1.52427096e+03,
+                                          1.19776919e+03,
+                                          -2.38088402e-03
+                                   ]
+                            ],
+                            "_2D": [
+                                   [
+                                          1408.39912158,
+                                          1071.02311289
+                                   ],
+                                   [
+                                          1184.29037976,
+                                          957.50504327
+                                   ],
+                                   [
+                                          1341.51197171,
+                                          1232.96089649
+                                   ],
+                                   [
+                                          1454.90659428,
+                                          1345.95504206
+                                   ],
+                                   [
+                                          1561.04307997,
+                                          894.8452214
+                                   ],
+                                   [
+                                          1524.27095973,
+                                          1197.7691884
+                                   ]
+                            ]
+                     },
+                     "count": 1,
+                     "glasses": {
+                            "success": "True",
+                            "detected": "True"
+                     },
+                     "eyes": {
+                            "level": 925.7194914519787,
+                            "position": [
+                                   [
+                                          1300.51264802,
+                                          938.17672211
+                                   ],
+                                   [
+                                          1449.50333309,
+                                          913.26226079
+                                   ]
+                            ]
+                     },
+                     "center": {
+                            "x": 1408.399121582508,
+                            "y": 1071.0231128931046
+                     }
+              },
+              "shoulders": {
+                     "success": "True",
+                     "position": {
+                            "success": "True",
+                            "left": {
+                                   "x": 2191.7367454767227,
+                                   "y": 1871.1518995761871
+                            },
+                            "right": {
+                                   "x": 782.884135901928,
+                                   "y": 1851.8204100131989
+                            }
+                     },
+                     "slope": 0.786131388731386
+              },
+              "head": {
+                     "top": 431,
+                     "bottom": 1345.95504206419,
+                     "success": "True"
+              }
+       },
+       "tests": {
+              "passed": "False",
+              "face": {
+                     "passed": "False",
+                     "detected": "True"
+              },
+              "glasses": {
+                     "passed": "False",
+                     "detected": "True"
+              },
+              "shoulders": {
+                     "passed": "True",
+                     "detected": "True"
+              },
+              "errors": [
+                     {
+                            "code": "FACE_NOT_STRAIGHT",
+                            "message": "You are not looking straight at the camera. Please try again."
+                     },
+                     {
+                            "code": "GLASSES",
+                            "message": "Glasses detected. Please remove your glasses and try again."
+                     }
+              ]
+       },
+       "crop": "None",
+       "save": "None"
+}
