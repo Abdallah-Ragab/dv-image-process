@@ -68,24 +68,28 @@ class Person(Face, Body, Head):
 
     def get_errors(self):
         errors = []
-        if not self.RESULTS.face.detected:
+        if not self.INFO.face.success:
             errors.append({
                 "code" : "NO_FACE",
-                "message" : "Could not detect a face in the image. Try removing any obstructions and try again."
+                "message" : "Could not detect a face in the image. Try removing any obstructions and try again.",
+                "message_ar" : "لم نتمكن من الكشف عن وجهك في الصورة. حاول إزالة أي عوائق وحاول مرة أخرى."
             })
-        if not self.RESULTS.face.passed:
+        if not self.face_passed():
             errors.append({
                 "code" : "FACE_NOT_STRAIGHT",
-                "message" : "You are not looking straight at the camera. Please try again."
+                "message" : "You are not looking straight at the camera. Please try again.",
+                "message_ar" : "وجهك ليس مستقيماً أمام الكاميرا. يرجى المحاولة مرة أخرى."
             })
-        if not self.RESULTS.glasses.passed:
+        if not self.glasses_passed():
             errors.append({
                 "code" : "GLASSES",
-                "message" : "Glasses detected. Please remove your glasses and try again."
+                "message" : "Glasses detected. Please remove your glasses and try again.",
+                "message_ar" : "تم الكشف عن إرتداء نظارات. يرجى إزالة النظارات والمحاولة مرة أخرى."
             })
-        if not self.RESULTS.shoulders.passed:
+        if not self.shoulders_passed():
             errors.append({
                 "code" : "SHOULDERS",
-                "message" : "You are not facing the camera. Try standing straight and facing the camera."
+                "message" : "You are not facing the camera. Try standing straight and facing the camera.",
+                "message_ar" : "أنت لا تقف باستقامة أمام الكاميرا. حاول الوقوف بشكل مستقيم والنظر إلى الكاميرا."
             })
         return errors
