@@ -25,10 +25,7 @@ class Person(Face, Body, Head):
         shoulders_passed = self.shoulders_passed()
         errors = self.get_errors()
 
-        if self.INFO.shoulders.success:
-            passed = (face_passed and glasses_passed and shoulders_passed)
-        else:
-            passed = (face_passed and glasses_passed)
+        passed = (face_passed and glasses_passed and shoulders_passed)
 
         self.RESULTS = OBJ(
             passed = passed,
@@ -64,7 +61,7 @@ class Person(Face, Body, Head):
             shoulders_slope = self.INFO.shoulders.slope or 999
             return abs(float(shoulders_slope)) < 3
         else:
-            return False
+            return True
 
     def get_errors(self):
         errors = []
