@@ -1,16 +1,16 @@
 import time
 import cv2, os
-from models import Person
-from crop import Crop
 from contextlib import contextmanager
-import sys, os
-from log_config import logger
-from save import compress
-from exceptions import SaveError
 from pathlib import Path
-from filters import blur
+import sys, os
 import json
-from utils import NumpyDatatypesEncoder
+from idcut.models import Person
+from idcut.crop import Crop
+from idcut.logging import logger
+from idcut.save import compress
+from idcut.exceptions import SaveError
+from idcut.filters import blur
+from idcut.utils import NumpyDatatypesEncoder
 
 @contextmanager
 def suppress_stdout():
