@@ -1,7 +1,7 @@
-from clients.s3 import S3Client
 from pathlib import Path
-from log_config import logger
-from models.constants import *
+from idcrop.clients.s3 import S3Client
+from idcrop.log_config import logger
+from idcrop.models.constants import *
 
 PREPROCESSED_BUCKET = "pre"
 PROCESSED_BUCKET = "post"

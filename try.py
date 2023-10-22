@@ -4,13 +4,13 @@ from contextlib import contextmanager
 from pathlib import Path
 import sys, os
 import json
-from idcut.models import Person
-from idcut.crop import Crop
-from idcut.logging import logger
-from idcut.save import compress
-from idcut.exceptions import SaveError
-from idcut.filters import blur
-from idcut.utils import NumpyDatatypesEncoder
+from idcrop.models import Person
+from idcrop.crop import Crop
+from idcrop.logging import logger
+from idcrop.save import compress
+from idcrop.exceptions import SaveError
+from idcrop.filters import blur
+from idcrop.utils import NumpyDatatypesEncoder
 
 @contextmanager
 def suppress_stdout():
@@ -21,8 +21,6 @@ def suppress_stdout():
             yield
         finally:
             sys.stdout = old_stdout
-
-from log_config import logger
 
 def process_image(file_path, output_dir):
     start = time.time()
