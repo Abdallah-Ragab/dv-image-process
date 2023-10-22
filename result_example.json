@@ -1,146 +1,192 @@
 {
-       "file": "21.jpg",
-       "detection": {
-              "face": {
-                     "success": "True",
-                     "rotation": {
-                            "angles": {
-                                   "x": 3.6037313800004,
-                                   "y": -0.1415218245217727,
-                                   "z": -0.03146486604979167
-                            },
-                            "direction": "Slightly Up",
-                            "success": "True"
-                     },
-                     "position": {
-                            "_3D": [
-                                   [
-                                          1.40839912e+03,
-                                          1.07102311e+03,
-                                          -4.94066030e-02
-                                   ],
-                                   [
-                                          1.18429038e+03,
-                                          9.57505043e+02,
-                                          1.53695885e-02
-                                   ],
-                                   [
-                                          1.34151197e+03,
-                                          1.23296090e+03,
-                                          -8.22271127e-03
-                                   ],
-                                   [
-                                          1.45490659e+03,
-                                          1.34595504e+03,
-                                          -1.78066883e-02
-                                   ],
-                                   [
-                                          1.56104308e+03,
-                                          8.94845221e+02,
-                                          2.56192107e-02
-                                   ],
-                                   [
-                                          1.52427096e+03,
-                                          1.19776919e+03,
-                                          -2.38088402e-03
-                                   ]
-                            ],
-                            "_2D": [
-                                   [
-                                          1408.39912158,
-                                          1071.02311289
-                                   ],
-                                   [
-                                          1184.29037976,
-                                          957.50504327
-                                   ],
-                                   [
-                                          1341.51197171,
-                                          1232.96089649
-                                   ],
-                                   [
-                                          1454.90659428,
-                                          1345.95504206
-                                   ],
-                                   [
-                                          1561.04307997,
-                                          894.8452214
-                                   ],
-                                   [
-                                          1524.27095973,
-                                          1197.7691884
-                                   ]
-                            ]
-                     },
-                     "count": 1,
-                     "glasses": {
-                            "success": "True",
-                            "detected": "True"
-                     },
-                     "eyes": {
-                            "level": 925.7194914519787,
-                            "position": [
-                                   [
-                                          1300.51264802,
-                                          938.17672211
-                                   ],
-                                   [
-                                          1449.50333309,
-                                          913.26226079
-                                   ]
-                            ]
-                     },
-                     "center": {
-                            "x": 1408.399121582508,
-                            "y": 1071.0231128931046
-                     }
-              },
-              "shoulders": {
-                     "success": "True",
-                     "position": {
-                            "success": "True",
-                            "left": {
-                                   "x": 2191.7367454767227,
-                                   "y": 1871.1518995761871
-                            },
-                            "right": {
-                                   "x": 782.884135901928,
-                                   "y": 1851.8204100131989
-                            }
-                     },
-                     "slope": 0.786131388731386
-              },
-              "head": {
-                     "top": 431,
-                     "bottom": 1345.95504206419,
-                     "success": "True"
-              }
-       },
-       "tests": {
-              "passed": "False",
-              "face": {
-                     "passed": "False",
-                     "detected": "True"
-              },
-              "glasses": {
-                     "passed": "False",
-                     "detected": "True"
-              },
-              "shoulders": {
-                     "passed": "True",
-                     "detected": "True"
-              },
-              "errors": [
-                     {
-                            "code": "FACE_NOT_STRAIGHT",
-                            "message": "You are not looking straight at the camera. Please try again."
-                     },
-                     {
-                            "code": "GLASSES",
-                            "message": "Glasses detected. Please remove your glasses and try again."
-                     }
-              ]
-       },
-       "crop": "None",
-       "save": "None"
+    "1": {
+        "detection": {
+            "passed": true,
+            "face": {
+                "passed": true,
+                "detected": true
+            },
+            "glasses": {
+                "passed": true,
+                "detected": true
+            },
+            "shoulders": {
+                "passed": true,
+                "detected": false
+            },
+            "errors": []
+        },
+        "crop": {
+            "success": true,
+            "details": {
+                "head_ratio": 58,
+                "eye_level_ratio": 63,
+                "top_padding_ratio": 5.093561459612978,
+                "bottom_padding_ratio": 36.90643854038702,
+                "dimensions": {
+                    "x": 3596,
+                    "y": 3596
+                }
+            },
+            "errors": [
+                {
+                    "code": "head_too_close",
+                    "message": "The head is too close to the top or bottom edges of the image.",
+                    "message_ar": "\u0644\u0627 \u064a\u0645\u0643\u0646 \u0642\u0635 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0627\u0644\u0623\u0628\u0639\u0627\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 (\u0627\u0644\u0631\u0623\u0633 \u0642\u0631\u064a\u0628 \u062c\u062f\u0627\u064b \u0645\u0646 \u062d\u0648\u0627\u0641 \u0627\u0644\u0635\u0648\u0631\u0629)."
+                }
+            ]
+        },
+        "save": {
+            "success": true,
+            "path": "images/output\\1_90.jpg",
+            "size": 182.9150390625,
+            "quality": 90,
+            "dimensions": {
+                "x": 1000,
+                "y": 999
+            }
+        }
+    },
+    "2": {
+        "detection": {
+            "passed": true,
+            "face": {
+                "passed": true,
+                "detected": true
+            },
+            "glasses": {
+                "passed": true,
+                "detected": true
+            },
+            "shoulders": {
+                "passed": true,
+                "detected": true
+            },
+            "errors": []
+        },
+        "crop": {
+            "success": true,
+            "details": {
+                "head_ratio": 50,
+                "eye_level_ratio": 60,
+                "top_padding_ratio": 11.741798583136358,
+                "bottom_padding_ratio": 38.25820141686364,
+                "dimensions": {
+                    "x": 2446,
+                    "y": 2446
+                }
+            },
+            "errors": []
+        },
+        "save": {
+            "success": true,
+            "path": "images/output\\2_90.jpg",
+            "size": 179.65625,
+            "quality": 90,
+            "dimensions": {
+                "x": 1000,
+                "y": 1000
+            }
+        }
+    },
+    "3": null,
+    "4": null,
+    "18": {
+        "detection": {
+            "passed": true,
+            "face": {
+                "passed": true,
+                "detected": true
+            },
+            "glasses": {
+                "passed": true,
+                "detected": true
+            },
+            "shoulders": {
+                "passed": true,
+                "detected": false
+            },
+            "errors": []
+        },
+        "crop": {
+            "success": true,
+            "details": {
+                "head_ratio": 50,
+                "eye_level_ratio": 65,
+                "top_padding_ratio": 8.268589677847807,
+                "bottom_padding_ratio": 41.73141032215219,
+                "dimensions": {
+                    "x": 3084,
+                    "y": 3084
+                }
+            },
+            "errors": [
+                {
+                    "code": "head_too_high",
+                    "message": "The head is too close to the top edge of the image.",
+                    "message_ar": "\u0644\u0627 \u064a\u0645\u0643\u0646 \u0642\u0635 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0627\u0644\u0623\u0628\u0639\u0627\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 (\u0627\u0644\u0631\u0623\u0633 \u0642\u0631\u064a\u0628 \u062c\u062f\u0627\u064b \u0645\u0646 \u062d\u0627\u0641\u0629 \u0627\u0644\u0635\u0648\u0631\u0629 \u0627\u0644\u0639\u0644\u0648\u064a\u0629)."
+                }
+            ]
+        },
+        "save": {
+            "success": true,
+            "path": "images/output\\18_90.jpg",
+            "size": 223.748046875,
+            "quality": 90,
+            "dimensions": {
+                "x": 1000,
+                "y": 1000
+            }
+        }
+    },
+    "19": {
+        "detection": {
+            "passed": true,
+            "face": {
+                "passed": true,
+                "detected": true
+            },
+            "glasses": {
+                "passed": true,
+                "detected": true
+            },
+            "shoulders": {
+                "passed": true,
+                "detected": true
+            },
+            "errors": []
+        },
+        "crop": {
+            "success": true,
+            "details": {
+                "head_ratio": 53,
+                "eye_level_ratio": 60,
+                "top_padding_ratio": 10.873509320570292,
+                "bottom_padding_ratio": 36.12649067942971,
+                "dimensions": {
+                    "x": 3545,
+                    "y": 3545
+                }
+            },
+            "errors": [
+                {
+                    "code": "image_too_slim",
+                    "message": "The image is too slim to be cropped at the right dimensions (image width is too small).",
+                    "message_ar": "\u0644\u0627 \u064a\u0645\u0643\u0646 \u0642\u0635 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0627\u0644\u0623\u0628\u0639\u0627\u062f \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 (\u0639\u0631\u0636\u0627\u0644\u0635\u0648\u0631\u0629 \u0635\u063a\u064a\u0631 \u062c\u062f\u0627\u064b)."
+                }
+            ]
+        },
+        "save": {
+            "success": true,
+            "path": "images/output\\19_95.jpg",
+            "size": 166.93359375,
+            "quality": 95,
+            "dimensions": {
+                "x": 1000,
+                "y": 1000
+            }
+        }
+    },
+    "20": null,
+    "21": null
 }
