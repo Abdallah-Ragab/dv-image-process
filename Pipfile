@@ -10,6 +10,7 @@ exifread = "*"
 loguru = "*"
 boto3 = "*"
 python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
 
